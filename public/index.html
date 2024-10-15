@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>𝐒𝐇𝐎𝐓𝐈 𝐖𝐄𝐁 𝐁𝐘 𝐙𝐂𝐃𝐒 𝐏𝐇 𝐅𝐑𝐄𝐄 𝐍𝐎 𝐀𝐃𝐒</title>
+     <link rel="icon" type="image/png" href="https://i.ibb.co/d64M9YF/IDOLS.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #121212;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #e0e0e0;
+        }
+        h1 {
+            font-family: 'Roboto', sans-serif;
+            color: #9c27b0;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-align: center;
+        }
+        .horizontal-line {
+            width: 100%;
+            max-width: 500px;
+            height: 2px;
+            background-color: #9c27b0;
+            margin-bottom: 20px;
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-family: 'Open Sans', sans-serif;
+            background-color: #9c27b0;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            margin: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        button:hover {
+            transform: scale(1.05);
+            background-color: #7b1fa2;
+        }
+        #video-container {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid #9c27b0;
+            border-radius: 8px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            background-color: #1e1e1e;
+        }
+        #video-player {
+            width: 100%;
+            height: auto;
+            display: none;
+        }
+        .message {
+            margin-top: 20px;
+            color: #f44336;
+            display: none;
+            font-weight: bold;
+        }
+        .spinner {
+            display: none;
+            border: 8px solid #3c3c3c;
+            border-top: 8px solid #9c27b0;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-top: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @media (max-width: 600px) {
+            button {
+                width: 100%;
+                font-size: 14px;
+            }
+            #video-container {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>𝐒𝐇𝐎𝐓𝐈 𝐖𝐄𝐁 𝐁𝐘 𝐙𝐂𝐃𝐒 𝐏𝐇</h1>
+    <div class="horizontal-line"></div>
+    <div id="video-container">
+        <video id="video-player" controls></video>
+    </div>
+    <div class="button-container">
+        <button id="start-video">Start Video</button>
+        <button id="next-video" style="display:none;">Next Video</button>
+        <button id="download-video" style="display:none;">Download Video</button>
+        <div class="spinner" id="spinner"></div>
+    </div>
+    <div class="message" id="error-message"></div>
+
+    <script>
+        const startButton = document.getElementById('start-video');
+        const nextButton = document.getElementById('next-video');
+        const downloadButton = document.getElementById('download-video');
+        const videoPlayer = document.getElementById('video-player');
+        const errorMessage = document.getElementById('error-message');
+        const spinner = document.getElementById('spinner');
+
+        async function fetchVideo() {
+            try {
+                spinner.style.display = 'block';
+                nextButton.style.display = 'none';
+                const response = await fetch('/api/getvideo');
+                errorMessage.style.display = 'none';
+
+                if (!response.ok) {
+                    throw new Error(await response.text());
+                }
+
+                const videoBlob = await response.blob();
+                const videoUrl = URL.createObjectURL(videoBlob);
+                videoPlayer.src = videoUrl;
+                videoPlayer.style.display = 'block';
+                videoPlayer.play();
+                nextButton.style.display = 'inline-block';
+                downloadButton.style.display = 'inline-block';
+            } catch (error) {
+                errorMessage.textContent = 'Failed to fetch video: ' + error.message;
+                errorMessage.style.display = 'block';
+            } finally {
+                spinner.style.display = 'none';
+                nextButton.style.display = 'inline-block';
+            }
+        }
+
+        function handleVideoEnd() {
+            fetchVideo();
+        }
+
+        startButton.addEventListener('click', () => {
+            startButton.style.display = 'none';
+            fetchVideo();
+        });
+
+        nextButton.addEventListener('click', fetchVideo);
+        videoPlayer.addEventListener('ended', handleVideoEnd);
+
+        downloadButton.addEventListener('click', () => {
+            const videoUrl = videoPlayer.src;
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const filename = `ZCDSPH-${timestamp}.mp4`;
+            const a = document.createElement('a');
+            a.href = videoUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    </script>
+</body>
+</html>
